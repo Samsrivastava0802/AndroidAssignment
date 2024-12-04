@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -26,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.myjar.jarassignment.data.model.ComputerItem
+import com.myjar.jarassignment.ui.vm.JarUiEvent
 import com.myjar.jarassignment.ui.vm.JarUiState
 import com.myjar.jarassignment.ui.vm.JarViewModel
 import com.myjar.jarassignment.utils.AppString
@@ -42,7 +44,10 @@ fun AppNavigation(
         composable("item_list") {
             ItemListScreen(
                 uiState = viewModel.uiState,
-                onNavigateToDetail = { selectedItem -> navigate.value = selectedItem },
+                onSearchTextChanged = viewModel::onEventChange,
+                onNavigateToDetail = {
+                    navController.navigate("item_detail/$it")
+                },
                 navigate = navigate,
                 navController = navController
             )
@@ -57,33 +62,42 @@ fun AppNavigation(
 @Composable
 fun ItemListScreen(
     uiState: JarUiState,
+    onSearchTextChanged: (JarUiEvent) -> Unit,
     onNavigateToDetail: (String) -> Unit,
     navigate: MutableState<String>,
     navController: NavHostController
 ) {
-//    if (navigate.value.isNotBlank()) {
-//        val currRoute = navController.currentDestination?.route.orEmpty()
-//        if (!currRoute.contains("item_detail")) {
-//            navController.navigate("item_detail/${navigate.value}")
-//        }
-//    }
-
-    LaunchedEffect(key1 = uiState.data) {
-        Log.d("tesrt555", "ItemListScreen:  ${uiState.data}")
+    if (navigate.value.isNotBlank()) {
+        val currRoute = navController.currentDestination?.route.orEmpty()
+        if (!currRoute.contains("item_detail")) {
+            navController.navigate("item_detail/${navigate.value}")
+        }
     }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        item {
+            TextField(
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                value = uiState.searchFieldText,
+                onValueChange = {
+                    onSearchTextChanged(JarUiEvent.OnSearchTextChanged(it.text))
+                }
+            )
+        }
+
         items(uiState.data.size) {
             ItemCard(
                 item = uiState.data[it],
                 onClick = { onNavigateToDetail(uiState.data[it].id) }
             )
             Spacer(modifier = Modifier.height(8.dp))
-//            Text(text = uiState.data[it].name)
-//            Log.d("lion3322", "ItemListScreen: ${uiState.data[it]}")
         }
     }
 }
