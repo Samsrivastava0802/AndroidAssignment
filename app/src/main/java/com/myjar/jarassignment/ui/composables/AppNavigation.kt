@@ -85,14 +85,14 @@ fun ItemListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
-                value = uiState.searchFieldText,
+                value = uiState.searchFieldText.text,
                 onValueChange = {
-                    onSearchTextChanged(JarUiEvent.OnSearchTextChanged(it.text))
+                    onSearchTextChanged(JarUiEvent.OnSearchTextChanged(it))
                 }
             )
         }
 
-        items(uiState.data.size) {
+        items(uiState.filteredList.size) {
             ItemCard(
                 item = uiState.data[it],
                 onClick = { onNavigateToDetail(uiState.data[it].id) }

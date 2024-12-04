@@ -32,7 +32,10 @@ class JarViewModel : ViewModel() {
     fun fetchData() {
         viewModelScope.launch {
             repository.fetchResults().collect {
-                uiState = uiState.copy(data = it)
+                uiState = uiState.copy(
+                    data = it,
+                    filteredList = it
+                )
             }
         }
     }
@@ -46,12 +49,18 @@ class JarViewModel : ViewModel() {
     }
 
     private fun performSearch(text: String) {
-        uiState = uiState.copy(
-            searchFieldText = TextFieldValue(text),
-            filteredList = uiState.data.filter {
-                it.name.contains(text)
-            }
-        )
+        uiState = if (text.isEmpty()) {
+            uiState.copy(
+                filteredList = uiState.data
+            )
+        } else {
+            uiState.copy(
+                searchFieldText = TextFieldValue(text),
+                filteredList = uiState.data.filter {
+                    it.name.contains(text)
+                }
+            )
+        }
     }
 }
 
